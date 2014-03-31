@@ -237,6 +237,9 @@ Ink.createModule('Ink.UI.Carousel', '1',
 
             var ulRect = this._ulEl.getBoundingClientRect();
 
+            // TODO horizontal only
+            this._swipeData.firstUlPos = ulRect.left;
+
             this._swipeData.inUlX =  this._swipeData.x - ulRect.left;
             this._swipeData.inUlY =  this._swipeData.y - ulRect.top;
 
@@ -304,20 +307,27 @@ Ink.createModule('Ink.UI.Carousel', '1',
                 var snapToNext = 0.1;  // swipe 10% of the way to change page
                 var progress = - this._swipeData.lastUlPos;
 
+                // TODO horizontal only
+                var relProgress = this._swipeData.firstUlPos - this._ulEl.getBoundingClientRect().left
+
                 var curPage = this.getPage();
                 var estimatedPage = progress / this._elLength / this._slidesPerPage;
 
-                if (Math.round(estimatedPage) === curPage) {
-                    var diff = estimatedPage - curPage;
-                    if (Math.abs(diff) > snapToNext) {
-                        diff = diff > 0 ? 1 : -1;
-                        curPage += diff;
+                if (!(relProgress > 0 && curPage === this._numPages - 1)) {
+                    if (Math.round(estimatedPage) === curPage) {
+                        var diff = estimatedPage - curPage;
+                        if (Math.abs(diff) > snapToNext) {
+                            diff = diff > 0 ? 1 : -1;
+                            curPage += diff;
+                        }
+                    } else {
+                        curPage = Math.round(estimatedPage);
                     }
-                } else {
-                    curPage = Math.round(estimatedPage);
                 }
 
-                this.setPage(curPage);
+                if (!isNaN(curPage)) {
+                    this.setPage(curPage);
+                }
 
                 InkEvent.stopPropagation(event);
                 InkEvent.stopDefault(event);
