@@ -305,26 +305,21 @@ Ink.createModule('Ink.UI.Carousel', '1',
         _onTouchEnd: function (event) {
             if (this._swipeData && this._swipeData.pointerPos && !this._scrolling && !this._touchMoveIsFirstTouchMove) {
                 var snapToNext = 0.1;  // swipe 10% of the way to change page
-                var progress = - this._swipeData.lastUlPos;
 
                 // TODO horizontal only
                 var relProgress = this._swipeData.firstUlPos - this._ulEl.getBoundingClientRect().left
 
                 var curPage = this.getPage();
-                var estimatedPage = progress / this._elLength / this._slidesPerPage;
 
-                if (!(relProgress > 0 && curPage === this._numPages - 1)) {
-                    if (Math.round(estimatedPage) === curPage) {
-                        var diff = estimatedPage - curPage;
-                        if (Math.abs(diff) > snapToNext) {
-                            diff = diff > 0 ? 1 : -1;
-                            curPage += diff;
-                        }
-                    } else {
-                        curPage = Math.round(estimatedPage);
-                    }
+                // How many pages were advanced? May be fractional.
+                var progressInPages = relProgress / this._elLength / this._slidesPerPage;
+
+                // Have we advanced enough to change page?
+                if (Math.abs(progressInPages) > snapToNext) {
+                    curPage += Math[ relProgress < 0 ? 'floor' : 'ceil' ](progressInPages);
                 }
 
+                // If something used to calculate progressInPages was zero, we get NaN here.
                 if (!isNaN(curPage)) {
                     this.setPage(curPage);
                 }
